@@ -5,7 +5,10 @@ config =
     INITIAL_FOOD_COLOR: 'green'
     INITIAL_SPEED: 200
 
+graphics = null
+
 window.startGame = ->
+    graphics = new Graphics()
     playground = new Playground 50
     playground.addSnake 15, new Position(2, 2), Direction.right
     # playground.addSnake 15, new Position(8, 8), Direction.right
@@ -15,12 +18,13 @@ window.startGame = ->
 
 
 class Graphics
-    constructor: (@gridSize, @squareSize) ->
+    constructor: ->
+        @squareSize = config.SQUARE_SIZE
         @canvas = document.getElementById 'canvas'
         @context = canvas.getContext '2d'
 
-    initCanvas: ->
-        sizeInPx = @gridSize * @squareSize
+    paintGrid: (gridSize) ->
+        sizeInPx = gridSize * @squareSize
         @canvas.width = sizeInPx
         @canvas.height = sizeInPx
         @canvas.style.backgroundColor = config.BACKGROUND_COLOR
@@ -37,27 +41,27 @@ class Graphics
     calculateCanvasPosition: (gridPosition) ->
         return new Position gridPosition.x * @squareSize, gridPosition.y * @squareSize
 
-    paintAll: (color) ->
-        fullSize = @gridSize * @squareSize
+    paintAll: (color, gridSize) ->
+        fullSize = gridSize * @squareSize
         @context.fillStyle = color
         @context.fillRect 0, 0, fullSize, fullSize
 
 
 class Playground
-    constructor: (gridSize) ->
-        @graphics = new Graphics gridSize, config.SQUARE_SIZE
-        @graphics.initCanvas()
+    constructor: (@gridSize) ->
         @snakes = []
         @dishes = []
         @isGameOver = false
 
+        graphics.paintGrid @gridSize
+
     addSnake: (size, position, direction) ->
-        snake = new Snake @, @graphics, size, position, direction
-        snake.paint()
+        snake = new Snake this, size, position, direction
         @snakes.push snake
+        snake.move()
 
     addFood: (amount, position) ->
-        food = new Food @graphics, amount, position
+        food = new Food amount, position
         food.paint()
         @dishes.push food
 
@@ -86,9 +90,9 @@ class Playground
 
     gameOver: ->
         @isGameOver = true
-        @graphics.paintAll 'black'
+        graphics.paintAll 'black', @gridSize
         setTimeout =>
-            @graphics.paintAll 'white'
+            graphics.paintAll 'white', @gridSize
         , 500
 
 class Position
@@ -108,15 +112,16 @@ class Direction
     @down: new Direction('down', 0, 1)
 
 class Food
-    constructor: (@graphics, @amount, @position) ->
+    constructor: (@amount, @position, @color) ->
         @color = config.INITIAL_FOOD_COLOR
 
     paint: ->
-        @graphics.paintRect @position, @color
+        graphics.paintRect @position, @color
 
 class Snake
-    constructor: (@playground, @graphics, initialSize, startPosition, startDirection) ->
-        @color = config.INITIAL_SNAKE_COLOR
+    constructor: (@playground, initialSize, startPosition, startDirection) ->
+        @colorIndex = 0
+        @colors = ['red', 'black']
         @expectedSize = initialSize
         @position = startPosition
         @direction = startDirection
@@ -128,8 +133,6 @@ class Snake
                 when 38 then @direction = Direction.up
                 when 39 then @direction = Direction.right
                 when 40 then @direction = Direction.down
-
-        @move()
 
     move: =>
         if @body.length is @expectedSize
@@ -153,14 +156,19 @@ class Snake
 
     cutTail: ->
         lastPosition = @body.shift()
-        @graphics.clearRect lastPosition
+        graphics.clearRect lastPosition
 
     calculateHeadPosition: ->
         @position.x += @direction.x
         @position.y += @direction.y
 
+    getColor: ->
+        color = @colors[@colorIndex]
+        @colorIndex = (@colorIndex + 1) % @colors.length
+        return color
+
     paint: ->
-        @graphics.paintRect @position, @color
+        graphics.paintRect @position, @getColor()
 
 
 
