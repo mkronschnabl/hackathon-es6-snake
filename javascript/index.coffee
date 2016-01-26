@@ -46,6 +46,11 @@ class Graphics
         @context.fillStyle = color
         @context.fillRect 0, 0, fullSize, fullSize
 
+    paintText: (text, color) ->
+        @context.fillStyle = color
+        @context.font = '48px serif'
+        @context.fillText text, 50, 50
+
 
 class Playground
     constructor: (@gridSize) ->
@@ -74,12 +79,14 @@ class Playground
         return isValid
 
     isValidPosition: (newPosition) ->
-        return false if @isGameOver
-        isValid = true
+        if newPosition.x < 0 or newPosition.x is @gridSize or newPosition.y < 0 or newPosition.y is @gridSize
+            return false
+
         for snake in @snakes
             for position in snake.body
-                isValid = false if position.equals newPosition
-        return isValid
+                return false if position.equals newPosition
+
+        return true
 
     getFood: (position) ->
         for food in @dishes
@@ -93,6 +100,7 @@ class Playground
         graphics.paintAll 'black', @gridSize
         setTimeout =>
             graphics.paintAll 'white', @gridSize
+            graphics.paintText 'GAME OVER!', 'black'
         , 500
 
 class Position
