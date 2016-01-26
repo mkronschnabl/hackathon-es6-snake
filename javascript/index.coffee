@@ -9,12 +9,10 @@ graphics = null
 
 window.startGame = ->
     graphics = new Graphics()
-    playground = new Playground 50
-    playground.addSnake 15, new Position(2, 2), Direction.right
-    # playground.addSnake 15, new Position(8, 8), Direction.right
-    playground.addFood 1, new Position(10, 10)
-    playground.addFood 1, new Position(12, 12)
-    playground.addFood 1, new Position(4, 14)
+    playground = new Playground 60
+    playground.addSnake 5, new Position(2, 2), Direction.right, ['red', 'black'], [37, 38, 39, 40]
+    playground.addSnake 5, new Position(58, 58), Direction.left, ['blue', 'yellow'], [65, 87, 68, 83]
+    playground.addFood 50
 
 
 class Graphics
@@ -60,15 +58,28 @@ class Playground
 
         graphics.paintGrid @gridSize
 
-    addSnake: (size, position, direction) ->
-        snake = new Snake this, size, position, direction
+    addSnake: (size, position, direction, colors, keyCodes) ->
+        snake = new Snake this, size, position, direction, colors, keyCodes
         @snakes.push snake
         snake.move()
 
-    addFood: (amount, position) ->
-        food = new Food amount, position
-        food.paint()
-        @dishes.push food
+    addFood: (number) ->
+        for i in [0..number]
+            position = @createRandomPosition()
+            # food = Food.orange position
+            food = Food.banana position
+
+            @dishes.push food
+            food.paint()
+
+    createRandomPosition: ->
+        x = @createRandomInteger()
+        y = @createRandomInteger()
+
+        return new Position x, y
+
+    createRandomInteger: ->
+        return Math.floor(Math.random() * (@gridSize - 1))
 
     checkPosition: (newPosition) ->
         return false if @isGameOver
@@ -121,15 +132,25 @@ class Direction
 
 class Food
     constructor: (@amount, @position, @color) ->
-        @color = config.INITIAL_FOOD_COLOR
 
     paint: ->
         graphics.paintRect @position, @color
 
+    @apple: (position) ->
+        return new Food 1, position, 'green'
+
+    @orange: (position) ->
+        return new Food 3, position, 'orange'
+
+    @banana: (position) ->
+        return new Food 7, position, 'yellow'
+
+
+
+
 class Snake
-    constructor: (@playground, initialSize, startPosition, startDirection) ->
+    constructor: (@playground, initialSize, startPosition, startDirection, @colors, keyCodes) ->
         @colorIndex = 0
-        @colors = ['red', 'black']
         @expectedSize = initialSize
         @position = startPosition
         @direction = startDirection
@@ -137,10 +158,10 @@ class Snake
 
         window.addEventListener 'keydown', (event) =>
             switch event.keyCode
-                when 37 then @direction = Direction.left
-                when 38 then @direction = Direction.up
-                when 39 then @direction = Direction.right
-                when 40 then @direction = Direction.down
+                when keyCodes[0] then @direction = Direction.left
+                when keyCodes[1] then @direction = Direction.up
+                when keyCodes[2] then @direction = Direction.right
+                when keyCodes[3] then @direction = Direction.down
 
     move: =>
         if @body.length is @expectedSize
