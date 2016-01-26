@@ -12,7 +12,7 @@ window.startGame = ->
     playground = new Playground 60
     playground.addSnake 5, new Position(2, 2), Direction.right, ['red', 'black'], [37, 38, 39, 40]
     playground.addSnake 5, new Position(58, 58), Direction.left, ['blue', 'yellow'], [65, 87, 68, 83]
-    playground.addFood 50
+    playground.addFood 15
 
 
 class Graphics
@@ -66,9 +66,17 @@ class Playground
     addFood: (number) ->
         for i in [0..number]
             position = @createRandomPosition()
-            # food = Food.orange position
-            food = Food.banana position
+            food = Food.apple position
+            @dishes.push food
+            food.paint()
 
+            position = @createRandomPosition()
+            food = Food.orange position
+            @dishes.push food
+            food.paint()
+
+            position = @createRandomPosition()
+            food = Food.banana position
             @dishes.push food
             food.paint()
 
