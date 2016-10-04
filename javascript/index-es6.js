@@ -14,8 +14,8 @@ window.startGame = () => {
     let playground;
     graphics = new Graphics();
     playground = new Playground(60);
+    playground.addFood(5);
     playground.addSnake(5, new Position(2, 2), Direction.right, ['red', 'black'], [37, 38, 39, 40]);
-    playground.addFood(15);
 };
 
 
@@ -135,6 +135,15 @@ class Playground {
         return true;
     }
 
+    checkFood () {
+        if (this.dishes.length === 0) {
+            this.gameWon();
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     getFood (position) {
         let index = this.dishes.findIndex((food) => {
             return position.equals(food.position)
@@ -152,10 +161,20 @@ class Playground {
     gameOver () {
         this.isGameOver = true;
         graphics.paintAll('black', this.gridSize);
-
         setTimeout(() => {
             graphics.paintAll('white', this.gridSize);
             graphics.paintText('GAME OVER!', 'black');
+        }, 500);
+    }
+
+    gameWon () {
+        graphics.paintAll('yellow', this.gridSize);
+        setTimeout(() => {
+            graphics.paintAll('red', this.gridSize);
+            setTimeout(() => {
+                graphics.paintAll('blue', this.gridSize);
+                graphics.paintText('YOU ARE A WINNER!', 'white');
+            }, 500);
         }, 500);
     }
 }
@@ -246,7 +265,7 @@ class Snake {
 
         this.calculateHeadPosition();
 
-        if (!this.playground.checkPosition(this.position)) {
+        if (!this.playground.checkPosition(this.position) || !this.playground.checkFood()) {
             return;
         }
 
