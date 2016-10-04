@@ -1,1 +1,1 @@
-# Hackathon-Snake
+# Hackathon ES6 Snake

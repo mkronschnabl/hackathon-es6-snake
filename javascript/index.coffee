@@ -11,9 +11,7 @@ window.startGame = ->
     graphics = new Graphics()
     playground = new Playground 60
     playground.addSnake 5, new Position(2, 2), Direction.right, ['red', 'black'], [37, 38, 39, 40]
-    playground.addSnake 5, new Position(58, 58), Direction.left, ['blue', 'yellow'], [65, 87, 68, 83]
     playground.addFood 15
-
 
 class Graphics
     constructor: ->
@@ -153,9 +151,6 @@ class Food
     @banana: (position) ->
         return new Food 7, position, 'yellow'
 
-
-
-
 class Snake
     constructor: (@playground, initialSize, startPosition, startDirection, @colors, keyCodes) ->
         @colorIndex = 0
@@ -206,6 +201,3 @@ class Snake
 
     paint: ->
         graphics.paintRect @position, @getColor()
-
-
-
