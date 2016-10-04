@@ -136,13 +136,17 @@ class Playground {
     }
 
     getFood (position) {
-        for (let food of this.dishes) {
-            if (position.equals(food.position)) {
-                return food.amount;
-            }
-        }
+        let index = this.dishes.findIndex((food) => {
+            return position.equals(food.position)
+        });
 
-        return 0;
+        if (index !== -1) {
+            let food = this.dishes[index];
+            this.dishes.splice(index, 1);
+            return food.amount;
+        } else {
+            return 0;
+        }
     }
 
     gameOver () {
